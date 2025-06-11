@@ -12,7 +12,7 @@ typedef struct {
     char next_char;
 } LZ77Token;
 
-// Função para calcular log2 inteiro (quantos bits precisamos)
+// Função para calcular log2 inteiro (quantidade bits )
 int log2_ceil(int n) {
     int bits = 0;
     n--;
@@ -60,10 +60,10 @@ void compress_LZ77(const char *input, int *total_bits_output, int *num_tokens) {
 
         char next_char = (pos + max_match_len < input_len) ? input[pos + max_match_len] : '\0';
 
-        // Imprime token
+        // Imprime o token
         printf("(%d, %d, %c)\n", best_offset, max_match_len, next_char ? next_char : ' ');
 
-        // Atualiza contagem de bits
+        // Atualiza a contagem de bits
         *total_bits_output += bits_offset + bits_length + bits_next_char;
         (*num_tokens)++;
 
@@ -73,7 +73,7 @@ void compress_LZ77(const char *input, int *total_bits_output, int *num_tokens) {
 }
 
     int main() {
-    const char *input_data = "ABABCABABCDABABCABABCD";  // você pode mudar para testar
+    const char *input_data = "ABABCABABCDABABCABABCD";  //Dado de entrada
 
     int input_len_bytes = strlen(input_data);
     int input_bits = input_len_bytes * 8;
