@@ -1,0 +1,1 @@
+# compress-o_dados_sem_perda
