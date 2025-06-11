@@ -1,0 +1,96 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#define WINDOW_SIZE 16
+#define BUFFER_SIZE 8
+
+typedef struct {
+    int offset;
+    int length;
+    char next_char;
+} LZ77Token;
+
+// Função para calcular log2 inteiro (quantos bits precisamos)
+int log2_ceil(int n) {
+    int bits = 0;
+    n--;
+    while (n > 0) {
+        bits++;
+        n >>= 1;
+    }
+    return bits;
+}
+
+void compress_LZ77(const char *input, int *total_bits_output, int *num_tokens) {
+    int input_len = strlen(input);
+    int pos = 0;
+
+    // Bits por campo:
+    int bits_offset = log2_ceil(WINDOW_SIZE);
+    int bits_length = log2_ceil(BUFFER_SIZE);
+    int bits_next_char = 8;
+
+    printf("LZ77 Compression Output:\n");
+
+    *total_bits_output = 0;
+    *num_tokens = 0;
+
+    while (pos < input_len) {
+        int max_match_len = 0;
+        int best_offset = 0;
+
+        int window_start = (pos - WINDOW_SIZE) > 0 ? (pos - WINDOW_SIZE) : 0;
+
+        for (int j = window_start; j < pos; j++) {
+            int match_len = 0;
+
+            while ((match_len < BUFFER_SIZE) &&
+                   (pos + match_len < input_len) &&
+                   (input[j + match_len] == input[pos + match_len])) {
+                match_len++;
+            }
+
+            if (match_len > max_match_len) {
+                max_match_len = match_len;
+                best_offset = pos - j;
+            }
+        }
+
+        char next_char = (pos + max_match_len < input_len) ? input[pos + max_match_len] : '\0';
+
+        // Imprime token
+        printf("(%d, %d, %c)\n", best_offset, max_match_len, next_char ? next_char : ' ');
+
+        // Atualiza contagem de bits
+        *total_bits_output += bits_offset + bits_length + bits_next_char;
+        (*num_tokens)++;
+
+        // Avança
+        pos += max_match_len + 1;
+    }
+}
+
+    int main() {
+    const char *input_data = "ABABCABABCDABABCABABCD";  // você pode mudar para testar
+
+    int input_len_bytes = strlen(input_data);
+    int input_bits = input_len_bytes * 8;
+
+    printf("Original input: %s\n\n", input_data);
+    printf("Original size: %d bytes (%d bits)\n\n", input_len_bytes, input_bits);
+
+    int total_bits_output = 0;
+    int num_tokens = 0;
+
+    compress_LZ77(input_data, &total_bits_output, &num_tokens);
+
+    printf("\nCompressed size: %d bits (~%.2f bytes)\n", total_bits_output, total_bits_output / 8.0);
+    printf("Number of tokens: %d\n", num_tokens);
+
+    float compression_ratio = (float)total_bits_output / input_bits;
+    printf("Compression ratio: %.2f%% of original size\n", compression_ratio * 100);
+
+    return 0;
+}
